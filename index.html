@@ -1,22 +1,27 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <title>Youtube API</title>
-    <link rel="stylesheet" href="css/style.css">
+    
 </head>
+
 <body>
     <main class="content">
         <h2>Videos</h2>
-        
+        <button id="execute-request-button">Authorize</button>
+        <div id="root"></div>
+        <button id="next-page-button">Next</button>
         <hr>
-        <ul>
-            <li>1</li>
-            <li>2</li>
-            <li>3</li>
-            <li>4</li>
-            <li>5</li>
-        </ul>
+
     </main>
+
+
+    <script src="./js/index.js"></script>
+    <script src="./js/api.js"></script>
+    <script async defer src="https://apis.google.com/js/api.js" onload="handleClientLoad()" onreadystatechange="if (this.readyState === 'complete') this.onload()"></script>
+    
 </body>
+
 </html>

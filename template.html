@@ -1,161 +1,311 @@
 <!doctype html>
 <html>
+
 <head>
-<title>Youtube API/title></head> 
-<meta charset="utf-8"
-<body> 
-<script> 
+    <title>Youtube API</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
 
-	/***** START BOILERPLATE CODE: Load client library, authorize user. *****/ 
+        #root {
+            display: flex;
+            border: 1px solid #ccc;
+            flex-direction: column;
+            position: relative;
+            align-items: flex-start;
+            justify-content: flex-start;
+            border-radius: 1%;
+        }
 
-// Global variables for GoogleAuth object, auth status. 
-var GoogleAuth; 
+        .container {
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            margin: 15px;
+        }
 
-/** 
-* Load the API's client and auth2 modules. 
-* Call the initClient function after the modules load. 
-*/ 
-function handleClientLoad() { 
-	gapi.load('client:auth2', initClient); 
-} 
+        a {
+            margin: 15px;
 
-function initClient() { 
-// Initialize the gapi.client object, which app uses to make API requests. 
-// Get API key and client ID from API Console. 
-// 'scope' field specifies space-delimited list of access scopes 
+        }
 
-gapi.client.init({ 
-	// 'apiKey': 'n_CSltv9xHtjaVBuXfunwHvK', 
-	'clientId': '86224178673-uo3jg0philg6dos738n4512nbongfjp8.apps.googleusercontent.com',
-	// 'clientId': '__YOUR_CLIENT_ID__',
-	'discoveryDocs': ['https://www.googleapis.com/discovery/v1/apis/youtube/v3/rest'], 
-	'scope': 'https://www.googleapis.com/auth/youtube.force-ssl https://www.googleapis.com/auth/youtubepartner',
-	// "redirect_uris":["http://localhost"],
-}).then(function () { 
-	GoogleAuth = gapi.auth2.getAuthInstance(); 
+        div.vId a {
+            position: absolute;
+            z-index: 100;
+            display: block;
+            width: 300px;
+            height: 150px;
+            top: 0;
+            left: 0;
+            margin: 0;
+        }
 
-// Listen for sign-in state changes. 
-GoogleAuth.isSignedIn.listen(updateSigninStatus); 
+        .vId {
+            position: relative;
+            width: 300px;
+            height: 150px;
 
-// Handle initial sign-in state. (Determine if user is already signed in.) 
-setSigninStatus(); 
+        }
 
-// Call handleAuthClick function when user clicks on "Authorize" button. 
-$('#execute-request-button').click(function() { 
+        #execute-request-button {
+            background-color: #4CAF50;
+            /* Green */
+            border: none;
+            color: white;
+            padding: 5px 15px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+        }
 
-	handleAuthClick(event); 
-}); 
-}); 
-} 
+        #execute-request-button:hover {
+            background-position: 0 0;
+            color: #fff;
+        }
 
-function handleAuthClick(event) { 
-// Sign user in after click on auth button. 
-GoogleAuth.signIn(); 
-} 
+        #nameFilter {
+            position: relative;
+            top: 0;
+            right: 0;
+            margin: 15px;
+            padding: 5px;
+        }
 
-function setSigninStatus() { 
-	var user = GoogleAuth.currentUser.get(); 
-	isAuthorized = user.hasGrantedScopes('https://www.googleapis.com/auth/youtube.force-ssl https://www.googleapis.com/auth/youtubepartner'); 
-// Toggle button text and displayed statement based on current auth status. 
-if (isAuthorized) { 
-	defineRequest(); 
-} 
-} 
-
-function updateSigninStatus(isSignedIn) { 
-	setSigninStatus(); 
-} 
-
-function createResource(properties) { 
-	var resource = {}; 
-	var normalizedProps = properties; 
-	for (var p in properties) { 
-		var value = properties[p]; 
-		if (p && p.substr(-2, 2) == '[]') { 
-			var adjustedName = p.replace('[]', ''); 
-			if (value) { 
-				normalizedProps[adjustedName] = value.split(','); 
-			} 
-			delete normalizedProps[p]; 
-		} 
-	} 
-	for (var p in normalizedProps) { 
-// Leave properties that don't have values out of inserted resource. 
-if (normalizedProps.hasOwnProperty(p) && normalizedProps[p]) { 
-	var propArray = p.split('.'); 
-	var ref = resource; 
-	for (var pa = 0; pa < propArray.length; pa++) { 
-		var key = propArray[pa]; 
-		if (pa == propArray.length - 1) { 
-			ref[key] = normalizedProps[p]; 
-		} else { 
-			ref = ref[key] = ref[key] || {}; 
-		} 
-	} 
-}; 
-} 
-return resource; 
-} 
-
-function removeEmptyParams(params) { 
-	for (var p in params) { 
-		if (!params[p] || params[p] == 'undefined') { 
-			delete params[p]; 
-		} 
-	} 
-	return params; 
-} 
-
-function executeRequest(request) { 
-	request.execute(function(response) { 
-		console.log(response); 
-	}); 
-} 
-
-function buildApiRequest(requestMethod, path, params, properties) { 
-	params = removeEmptyParams(params); 
-	var request; 
-	if (properties) { 
-		var resource = createResource(properties); 
-		request = gapi.client.request({ 
-			'body': resource, 
-			'method': requestMethod, 
-			'path': path, 
-			'params': params 
-		}); 
-	} else { 
-		request = gapi.client.request({ 
-			'method': requestMethod, 
-			'path': path, 
-			'params': params 
-		}); 
-	} 
-	executeRequest(request); 
-} 
-
-/***** END BOILERPLATE CODE *****/ 
+    </style>
+</head>
+<meta charset="utf-8">
 
 
-function defineRequest() { 
-// See full sample for buildApiRequest() code, which is not 
-// specific to a particular API or API method. 
 
-buildApiRequest('GET',
-                '/youtube/v3/search',
-                {'maxResults': '25',
-                 'part': 'snippet',
-                 'q': 'spring mvc',
-                 'type': ''});
 
-} 
-</script> 
+<script>
+    /***** START BOILERPLATE CODE: Load client library, authorize user. *****/
 
-<button id="execute-request-button">Authorize</button> 
+    // Global variables for GoogleAuth object, auth status. 
+    let GoogleAuth;
 
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script> 
-<script async defer src="https://apis.google.com/js/api.js" 
-onload="handleClientLoad()" 
-onreadystatechange="if (this.readyState === 'complete') this.onload()"> 
+    /** 
+     * Load the API's client and auth2 modules. 
+     * Call the initClient function after the modules load. 
+     */
+    function handleClientLoad() {
+        gapi.load('client:auth2', initClient);
+    }
+
+    function initClient() {
+        // Initialize the gapi.client object, which app uses to make API requests. 
+        // Get API key and client ID from API Console. 
+        // 'scope' field specifies space-delimited list of access scopes 
+
+        gapi.client.init({
+            'clientId': '86224178673-uo3jg0philg6dos738n4512nbongfjp8.apps.googleusercontent.com',
+            'discoveryDocs': ['https://www.googleapis.com/discovery/v1/apis/youtube/v3/rest'],
+            'scope': 'https://www.googleapis.com/auth/youtube.force-ssl https://www.googleapis.com/auth/youtubepartner',
+        }).then(function() {
+            GoogleAuth = gapi.auth2.getAuthInstance();
+
+            // Listen for sign-in state changes. 
+            GoogleAuth.isSignedIn.listen(updateSigninStatus);
+
+            // Handle initial sign-in state. (Determine if user is already signed in.) 
+            setSigninStatus();
+
+            // Call handleAuthClick function when user clicks on "Authorize" button. 
+            let authorizeButton = document.getElementById("execute-request-button");
+            authorizeButton.onclick = () => handleAuthClick(event);
+
+        });
+    }
+
+    function handleAuthClick(event) {
+        // Sign user in after click on auth button. 
+        GoogleAuth.signIn();
+    }
+
+    function setSigninStatus() {
+        var user = GoogleAuth.currentUser.get();
+        isAuthorized = user.hasGrantedScopes('https://www.googleapis.com/auth/youtube.force-ssl https://www.googleapis.com/auth/youtubepartner');
+        // Toggle button text and displayed statement based on current auth status. 
+    }
+
+    function updateSigninStatus(isSignedIn) {
+        setSigninStatus();
+    }
+
+    function createResource(properties) {
+        console.log(properties, "проперти");
+        var resource = {};
+        var normalizedProps = properties;
+        for (var p in properties) {
+            var value = properties[p];
+            if (p && p.substr(-2, 2) == '[]') {
+                var adjustedName = p.replace('[]', '');
+                if (value) {
+                    normalizedProps[adjustedName] = value.split(',');
+                }
+                delete normalizedProps[p];
+            }
+        }
+        for (var p in normalizedProps) {
+            // Leave properties that don't have values out of inserted resource. 
+            if (normalizedProps.hasOwnProperty(p) && normalizedProps[p]) {
+                var propArray = p.split('.');
+                var ref = resource;
+                for (var pa = 0; pa < propArray.length; pa++) {
+                    var key = propArray[pa];
+                    if (pa == propArray.length - 1) {
+                        ref[key] = normalizedProps[p];
+                    } else {
+                        ref = ref[key] = ref[key] || {};
+                    }
+                }
+            };
+        }
+        return resource;
+    }
+
+    function removeEmptyParams(params) {
+        for (var p in params) {
+            if (!params[p] || params[p] == 'undefined') {
+                delete params[p];
+            }
+        }
+        return params;
+    }
+
+    function executeRequest(request, callback) {
+        request.execute(function(response) {
+            console.log(response);
+
+            if (callback) {
+                callback(response);
+            }
+        });
+    }
+
+    function buildApiRequest(requestMethod, path, params, properties, callback) {
+        params = removeEmptyParams(params);
+        var request;
+        if (properties) {
+            var resource = createResource(properties);
+            request = gapi.client.request({
+                'body': resource,
+                'method': requestMethod,
+                'path': path,
+                'params': params
+            });
+        } else {
+            request = gapi.client.request({
+                'method': requestMethod,
+                'path': path,
+                'params': params
+            });
+        }
+        executeRequest(request, callback);
+    }
+
+    /***** END BOILERPLATE CODE *****/
+
+</script>
+
+
+<input id="nameFilter" type="text" placeholder="фильтровать по имени" />
+<div id="root"></div>
+<button id="prev-page-button">Previous</button>
+<button id="next-page-button">Next</button>
+<button id="execute-request-button">Authorize</button>
+
+
+<script async defer src="https://apis.google.com/js/api.js" onload="handleClientLoad()" onreadystatechange="if (this.readyState === 'complete') this.onload()">
+
+
+</script>
+<script>
+    let nextPage = null;
+    let prevPage = null;
+    let prevButton = document.getElementById("prev-page-button");
+    let nextButton = document.getElementById("next-page-button");
+    let root = document.getElementById("root");
+    let nameFilter = document.getElementById("nameFilter");
+
+    prevButton.onclick = () => {
+        let params = {
+            'maxResults': '5',
+            'part': 'snippet',
+            'q': 'spring mvc',
+            'type': 'video'
+        };
+
+        if (prevPage) {
+            params.pageToken = prevPage;
+        }
+
+        buildApiRequest('GET',
+            '/youtube/v3/search',
+            params,
+            null,
+            function(response) {
+                root.innerHTML = "";
+
+
+
+                prevPage = response.prevPageToken;
+            });
+    };
+
+    nextButton.onclick = () => {
+        var params = {
+            'maxResults': '5',
+            'part': 'snippet',
+            'q': 'spring mvc',
+            'type': ''
+        };
+
+        if (nextPage) {
+            params.pageToken = nextPage;
+        }
+
+        buildApiRequest('GET',
+            '/youtube/v3/search',
+            params,
+            null,
+            function(response) {
+                for (let item of response.items) {
+                    let d = document.createElement("div");
+
+                    let container = document.createElement("div");
+                    let link = document.createElement("a");
+                    let ghostLink = document.createElement("a");
+                    link.setAttribute("target", "_blank");
+                    link.onclick = function() {
+                        window.open = ("http://www.youtube.com/embed/" + item.id.videoId, "_blank");
+                    };
+                    link.setAttribute("href", "http://www.youtube.com/embed/" + item.id.videoId);
+                    ghostLink.setAttribute("href", "http://www.youtube.com/embed/" + item.id.videoId);
+                    ghostLink.setAttribute("target", "_blank");
+                    ghostLink.onclick = function() {
+                        window.open = ("http://www.youtube.com/embed/" + item.id.videoId, "_blank");
+                    };
+                    d.innerHTML = "<iframe src=http://www.youtube.com/embed/" + item.id.videoId + " allowfullscreen frameborder=0></iframe>";
+                    d.appendChild(ghostLink);
+                    d.setAttribute("class", "vId")
+
+                    link.innerHTML = item.snippet.title;
+                    container.appendChild(d);
+                    container.appendChild(link);
+                    container.setAttribute("class", "container");
+                    root.appendChild(container);
+
+                }
+
+
+                nextPage = response.nextPageToken;
+            });
+    };
+
 </script>
 </body>
+
 </html>
